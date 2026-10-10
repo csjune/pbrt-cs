@@ -1,0 +1,15 @@
+bin/
+obj/
+bin-double/
+obj-double/
+.vs/
+*.user
+TestResults/
+*.exr
+*.png
+!docs/**/*.png
+# Test images
+!tests/Pbrt.Tests/Data/*.exr
+
+# Porting notes (kept out of the repository)
+PORTING.md

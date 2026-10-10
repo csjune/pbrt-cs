@@ -1,0 +1,58 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>Pbrt</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Pbrt.Tests" />
+  </ItemGroup>
+
+  <!-- Large data tables converted from pbrt's sources by tools/gen-tables.ps1. -->
+  <ItemGroup>
+    <EmbeddedResource Include="Data\*.bin" LogicalName="Pbrt.Data.%(Filename).bin" />
+  </ItemGroup>
+
+  <!-- RGB to spectrum tables (util/color.cpp). As in pbrt's CMake build,
+       they are generated at build time by rgb2spec_opt (here
+       src/Pbrt.Rgb2SpecOpt, built in Release since it does a lot of work)
+       and embedded as resources. They only rebuild when the tool changes. -->
+  <PropertyGroup>
+    <Rgb2SpecOptProject>$(MSBuildThisFileDirectory)..\Pbrt.Rgb2SpecOpt\Pbrt.Rgb2SpecOpt.csproj</Rgb2SpecOptProject>
+    <RgbSpectrumDir>$(BaseIntermediateOutputPath)rgbspectrum\</RgbSpectrumDir>
+    <RgbSpectrumRes>64</RgbSpectrumRes>
+    <DotnetHost>$(DOTNET_HOST_PATH)</DotnetHost>
+    <DotnetHost Condition="'$(DotnetHost)' == ''">dotnet</DotnetHost>
+    <!-- Runs before PrepareResourceNames so the tables get resource names. -->
+    <PrepareResourcesDependsOn>EmbedRgbToSpectrumTables;$(PrepareResourcesDependsOn)</PrepareResourcesDependsOn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <RgbSpectrumGamut Include="sRGB;DCI_P3;REC2020;ACES2065_1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="StbImageSharp" Version="2.30.16" />
+    <!-- GLFW (with its native libraries) and OpenGL for the interactive mode (util/gui) -->
+    <PackageReference Include="Silk.NET.GLFW" Version="2.23.0" />
+    <PackageReference Include="Silk.NET.OpenGL.Legacy" Version="2.23.0" />
+  </ItemGroup>
+
+  <Target Name="BuildRgb2SpecOpt">
+    <MSBuild Projects="$(Rgb2SpecOptProject)" Targets="Restore" Properties="Configuration=Release;MSBuildRestoreSessionId=$([System.Guid]::NewGuid())" />
+    <MSBuild Projects="$(Rgb2SpecOptProject)" Targets="Build" Properties="Configuration=Release">
+      <Output TaskParameter="TargetOutputs" ItemName="Rgb2SpecOptAssembly" />
+    </MSBuild>
+  </Target>
+
+  <Target Name="GenerateRgbToSpectrumTables" DependsOnTargets="BuildRgb2SpecOpt" Inputs="@(Rgb2SpecOptAssembly)" Outputs="$(RgbSpectrumDir)%(RgbSpectrumGamut.Identity).bin">
+    <Exec Command="&quot;$(DotnetHost)&quot; &quot;@(Rgb2SpecOptAssembly)&quot; $(RgbSpectrumRes) &quot;$(RgbSpectrumDir)%(RgbSpectrumGamut.Identity).bin&quot; %(RgbSpectrumGamut.Identity)" />
+  </Target>
+
+  <Target Name="EmbedRgbToSpectrumTables" DependsOnTargets="GenerateRgbToSpectrumTables">
+    <ItemGroup>
+      <EmbeddedResource Include="$(RgbSpectrumDir)%(RgbSpectrumGamut.Identity).bin" LogicalName="Pbrt.RGBToSpectrumTable.%(RgbSpectrumGamut.Identity).bin" />
+    </ItemGroup>
+  </Target>
+
+</Project>

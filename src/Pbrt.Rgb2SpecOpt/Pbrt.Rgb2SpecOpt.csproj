@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- C# port of src/pbrt/cmd/rgb2spec_opt.cpp. Run at build time by
+       src/Pbrt/Pbrt.csproj to generate the RGB to spectrum tables. -->
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Pbrt.Rgb2SpecOpt</RootNamespace>
+    <!-- Standalone like the C++ tool: it does not use the pbrt library. -->
+    <Nullable>disable</Nullable>
+    <!-- Lets the build run it on whatever newer runtime is installed. -->
+    <RollForward>Major</RollForward>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Using Remove="Pbrt.Util" />
+    <Using Remove="System.Single" />
+  </ItemGroup>
+
+</Project>

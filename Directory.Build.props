@@ -1,0 +1,39 @@
+<Project>
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>14.0</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!-- pbrt relies on wrapping unsigned arithmetic (hashing, RNG, permutations). -->
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+    <TieredPGO>true</TieredPGO>
+  </PropertyGroup>
+
+  <!-- pbrt.h: Float type definition. Float is float unless built with
+       -p:PbrtFloatAsDouble=true (pbrt's PBRT_FLOAT_AS_DOUBLE), which makes it
+       double. That build goes to bin-double/ and obj-double/ so both can sit
+       side by side. -->
+  <PropertyGroup Condition="'$(PbrtFloatAsDouble)' == 'true'">
+    <BaseOutputPath>bin-double\</BaseOutputPath>
+    <BaseIntermediateOutputPath>obj-double\</BaseIntermediateOutputPath>
+    <DefineConstants>$(DefineConstants);PBRT_FLOAT_AS_DOUBLE</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup>
+    <DefaultItemExcludes>$(DefaultItemExcludes);bin/**;obj/**;bin-double/**;obj-double/**</DefaultItemExcludes>
+  </PropertyGroup>
+  <ItemGroup>
+    <Using Include="System.Single" Alias="Float" Condition="'$(PbrtFloatAsDouble)' != 'true'" />
+    <Using Include="System.Double" Alias="Float" Condition="'$(PbrtFloatAsDouble)' == 'true'" />
+    <Using Include="System.Runtime.CompilerServices" />
+  </ItemGroup>
+
+  <!-- pbrt's free functions live in one partial static class, Pbrt.Util (one
+       file per header), imported everywhere so ported code can call them
+       unqualified. A single class is required: an overload declared in one
+       static class hides same-named overloads imported from another. -->
+
+  <ItemGroup>
+    <Using Include="Pbrt.Util" Static="true" />
+  </ItemGroup>
+</Project>

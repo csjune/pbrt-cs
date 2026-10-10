@@ -1,0 +1,7 @@
+* text=auto
+*.cs diff=csharp
+# C# sources are checked out with LF everywhere: raw string literals (the
+# tools' usage text) would otherwise pick up CRLF line endings on Windows.
+*.cs text eol=lf
+*.bin binary
+*.exr binary

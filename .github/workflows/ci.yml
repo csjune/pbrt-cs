@@ -1,0 +1,46 @@
+# Builds pbrt-cs and runs the tests on Linux and Windows.
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        # Float = float (the default) and Float = double (PBRT_FLOAT_AS_DOUBLE)
+        float: [float, double]
+    runs-on: ${{ matrix.os }}
+    env:
+      FLOAT_ARGS: ${{ matrix.float == 'double' && '-p:PbrtFloatAsDouble=true' || '' }}
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore
+        run: dotnet restore Pbrt.sln ${{ env.FLOAT_ARGS }}
+
+      # The first build also runs rgb2spec_opt to make the RGB to spectrum
+      # tables (a minute or two).
+      - name: Build
+        run: dotnet build Pbrt.sln --no-restore ${{ env.FLOAT_ARGS }}
+
+      - name: Test
+        run: dotnet test Pbrt.sln --no-build ${{ env.FLOAT_ARGS }} --logger trx --results-directory TestResults
+
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.os }}-${{ matrix.float }}
+          path: TestResults

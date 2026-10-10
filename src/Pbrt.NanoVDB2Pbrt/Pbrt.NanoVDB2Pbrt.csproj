@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Pbrt.NanoVDB2Pbrt</RootNamespace>
+    <AssemblyName>nanovdb2pbrt</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Pbrt\Pbrt.csproj" />
+  </ItemGroup>
+
+</Project>

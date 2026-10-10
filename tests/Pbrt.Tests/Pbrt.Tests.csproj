@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <RootNamespace>Pbrt.Tests</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="6.0.2" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <!-- Test images (written by Data/gen-exr-dwa.py). -->
+  <ItemGroup>
+    <None Include="Data\*.exr" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Pbrt\Pbrt.csproj" />
+    <!-- The command-line tools, which ToolsTests runs as separate processes. -->
+    <ProjectReference Include="..\..\src\Pbrt.PlyTool\Pbrt.PlyTool.csproj" />
+    <ProjectReference Include="..\..\src\Pbrt.NanoVDB2Pbrt\Pbrt.NanoVDB2Pbrt.csproj" />
+    <ProjectReference Include="..\..\src\Pbrt.CyHair2Pbrt\Pbrt.CyHair2Pbrt.csproj" />
+    <ProjectReference Include="..\..\src\Pbrt.PSpec\Pbrt.PSpec.csproj" />
+    <ProjectReference Include="..\..\src\Pbrt.ImgTool\Pbrt.ImgTool.csproj" />
+  </ItemGroup>
+
+</Project>
